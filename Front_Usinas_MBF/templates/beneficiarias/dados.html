@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <?!= include('multiuso/header'); ?>
+  </head>
+  <body>
+    <div class='container-fluid'>
+      <div class='row' style='height: 100vh;'>
+        <div class='col-2'>
+          <?!= include('multiuso/menu_lateral'); ?>
+        </div>
+        <div class='col-10'>
+          <!-- Formulário para Inserir Informação -->
+          <div class='row mt-3'>
+            <h5>LISTA DE BENEFICIÁRIAS</h5>
+          </div>
+          <!-- botões -->
+          <div class="row mt-3">
+            <div class="col-2">
+              <a href="https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/beneficiaria/form&uc=0">
+                <button type="button" class="btn btn-success w-100" onclick="salvar_beneficiaria(obj_para_lancar)"><i class="bi bi-plus-circle"></i>&nbsp;Novo</button>
+              </a>
+            </div>
+            <div class="col-2">
+              <button type="button" class="btn btn-success w-100" onclick="altera_beneficiaria()"><i class="bi bi-pencil"></i>&nbspAlterar</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+                <table class="table" id="table_geradora">
+                  <thead>
+                    <tr>
+                      <th scope="col">UC</th>
+                      <th scope="col">NOME DO CLIENTE</th>
+                      <th scope="col">RATEIO %</th>
+                      <th scope="col">VENCE</th>
+                      <th scope="col">UG</th>
+                      <th scope="col">REPASSE</th>
+                      <th scope="col">% REPASSE</th>
+                      <th scope="col">UNIDADE</th>
+                      <th scope="col">PRÓXIMA LEITURA</th>
+                      <th scope="col">STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    
+                  </tbody>
+                </table>
+            </div>
+          </div>
+      </div>
+    </div>
+  </body>
+  <script>
+
+    $(document).ready(function(){
+      beneficiaria_tabela()
+    });
+
+    function altera_beneficiaria(obj_para_lancar){
+      var table_beneficiaria = document.getElementById("table_geradora")
+      var tbody =table_beneficiaria.getElementsByTagName('tbody')[0] 
+      var table_dark = tbody.querySelectorAll('.table-dark')[0]
+      var uc = table_dark.getElementsByTagName('td')[0].innerHTML
+      
+      var a = document.createElement('a')
+      a.href = "https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/geradora/form&uc=" + uc.toString()
+      
+      document.getElementsByTagName('body')[0].appendChild(a)
+      a.click()
+
+    }
+
+    function beneficiaria_tabela(){
+      google.script.run.withSuccessHandler(function(retorno){
+        var dados = JSON.parse(retorno)
+        dados = dados.slice(1,dados.lenght)
+        var table_beneficiaria = document.getElementById("table_geradora")
+        var tbody =table_beneficiaria.getElementsByTagName('tbody')[0] 
+
+        dados.forEach((item)=>{
+          var tr = document.createElement('tr')
+          tr.onclick = (e) =>{
+            limpa_click_na_tabela_beneficiaria(tbody)
+            var click_l = e.currentTarget
+            click_l.classList.add("table-dark")
+          }
+          // uc	
+          var td = document.createElement('td')
+          td.innerHTML = item[0]
+          tr.appendChild(td)
+
+          // nome_cliente	
+          var td = document.createElement('td')
+          td.innerHTML = item[1]
+          tr.appendChild(td)
+
+          // rt_%	
+          var td = document.createElement('td')
+          td.innerHTML = item[2]
+          tr.appendChild(td)
+
+          // venc	
+          var td = document.createElement('td')
+          td.innerHTML = item[3]
+          tr.appendChild(td)
+
+          // ug	
+          var td = document.createElement('td')
+          td.innerHTML = item[4]
+          tr.appendChild(td)
+
+          // repasse	
+          var td = document.createElement('td')
+          td.innerHTML = item[5]
+          tr.appendChild(td)
+
+          // %_repasse		
+          var td = document.createElement('td')
+          td.innerHTML = item[6]
+          tr.appendChild(td)
+
+          // unidade	prox_leit	status
+          var td = document.createElement('td')
+          td.innerHTML = item[7]
+          tr.appendChild(td)
+
+          // prox_leit
+          var td = document.createElement('td')
+          td.innerHTML = item[8]
+          tr.appendChild(td)
+
+          // status
+          var td = document.createElement('td')
+          td.innerHTML = item[9]
+          tr.appendChild(td)
+
+          tbody.appendChild(tr)
+        })
+      }).backend("ler_todas_beneficiarias",)//Obter lista de Geradoras
+    }
+
+    function limpa_click_na_tabela_beneficiaria(tbody){
+      var todas_tr = tbody.querySelectorAll("tr")
+      todas_tr.forEach((item)=>{
+        item.classList.remove("table-dark")
+      })
+    }
+  </script>
+</html>
