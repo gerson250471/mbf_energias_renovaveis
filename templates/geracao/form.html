@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+  <head>
+    <base target="_top" />
+    <?!= include('multiuso/header'); ?>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-2"><?!= include('multiuso/menu_lateral'); ?></div>
+        <div class="col-10">
+          <h5 class="mt-3">LANÇAMENTO DE GERAÇÃO</h5>
+          <hr />
+
+          <div class="row mt-3">
+            <div class="col-2">
+              <label>Ano</label>
+              <input type="number" id="ano" class="form-control" value="2025" />
+            </div>
+            <div class="col-2">
+              <label>Mês (número)</label>
+              <input
+                type="number"
+                id="mes"
+                class="form-control"
+                min="1"
+                max="12"
+              />
+            </div>
+            <div class="col-3">
+              <label>Usina (UG)</label>
+              <select
+                id="ug"
+                class="form-control"
+                onchange="atualizarNomeUsina()"
+              >
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+            <div class="col-5">
+              <label>Nome da Usina</label>
+              <input
+                type="text"
+                id="nome_usina"
+                class="form-control"
+                readonly
+              />
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-3">
+              <label>Geração (kWh)</label>
+              <input type="number" id="geracao" class="form-control" />
+            </div>
+            <div class="col-3">
+              <label>Crédito (R$)</label>
+              <input
+                type="number"
+                id="credito"
+                step="0.01"
+                class="form-control"
+              />
+            </div>
+            <div class="col-6">
+              <label>Anexar Fatura/Relatório (PDF)</label>
+              <input
+                type="file"
+                id="arquivo"
+                class="form-control"
+                accept="application/pdf"
+              />
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-3">
+              <button
+                type="button"
+                class="btn btn-primary w-100"
+                id="btn_salvar"
+                onclick="enviar()"
+              >
+                Salvar Lançamento
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var listaUsinas = [];
+
+      $(document).ready(function () {
+        // Carrega as usinas no select
+        google.script.run
+          .withSuccessHandler(function (res) {
+            listaUsinas = typeof res === "string" ? JSON.parse(res) : res;
+            var select = document.getElementById("ug");
+            for (var i = 1; i < listaUsinas.length; i++) {
+              var opt = document.createElement("option");
+              opt.value = listaUsinas[i][0];
+              opt.text = listaUsinas[i][0] + " - " + listaUsinas[i][1];
+              select.appendChild(opt);
+            }
+          })
+          .backend("ler_todas_geradoras");
+      });
+
+      function atualizarNomeUsina() {
+        var sel = document.getElementById("ug").value;
+        var usina = listaUsinas.find((u) => u[0] == sel);
+        document.getElementById("nome_usina").value = usina ? usina[1] : "";
+      }
+
+      function enviar() {
+        var btn = document.getElementById("btn_salvar");
+        var fileInput = document.getElementById("arquivo");
+        btn.disabled = true;
+
+        var dados = {
+          ano: document.getElementById("ano").value,
+          mes: document.getElementById("mes").value,
+          ug: document.getElementById("ug").value,
+          nome_usina: document.getElementById("nome_usina").value,
+          geracao: document.getElementById("geracao").value,
+          credito: document.getElementById("credito").value,
+        };
+
+        if (fileInput.files.length > 0) {
+          var reader = new FileReader();
+          var file = fileInput.files[0];
+          reader.onload = function (e) {
+            google.script.run
+              .withSuccessHandler(finalizar)
+              .backend("salvarGeracaoUsina", dados, e.target.result, file.name);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          google.script.run
+            .withSuccessHandler(finalizar)
+            .backend("salvarGeracaoUsina", dados, null, null);
+        }
+      }
+
+      function finalizar() {
+        alert("Lançamento realizado com sucesso!");
+        location.reload();
+      }
+    </script>
+  </body>
+</html>
