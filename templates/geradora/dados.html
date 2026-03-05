@@ -19,11 +19,15 @@
           <div class="row mt-3">
             <div class="col-2">
               <a href="https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/geradora/form&ug=0">
-                <button type="button" class="btn btn-success w-100" onclick="salvar_geradora(obj_para_lancar)"><i class="bi bi-plus-circle"></i>&nbsp;Novo</button>
+                <button type="button" class="btn btn-success w-100"><i class="bi bi-plus-circle"></i>&nbsp;Novo</button>
               </a>
             </div>
             <div class="col-2">
-              <button type="button" class="btn btn-success w-100" onclick="altera_geradora()"><i class="bi bi-pencil"></i>&nbspAlterar</button>
+              <button type="button" class="btn btn-success w-100" onclick="altera_geradora()"><i class="bi bi-pencil"></i>&nbsp;Alterar</button>
+            </div>
+            
+            <div class="col-2">
+              <button type="button" class="btn btn-danger w-100" onclick="deleta_geradora()"><i class="bi bi-trash"></i>&nbsp;Excluir</button>
             </div>
           </div>
           <div class="row">
@@ -135,5 +139,35 @@
         item.classList.remove("table-dark")
       })
     }
+
+    function deleta_geradora() {
+      var table_geradora = document.getElementById("table_geradora");
+      var tbody = table_geradora.getElementsByTagName('tbody')[0]; 
+      var table_dark = tbody.querySelectorAll('.table-dark');
+      
+      // Verifica se o usuário selecionou alguma linha
+      if(table_dark.length === 0) {
+        alert("Por favor, selecione uma geradora na tabela para excluir.");
+        return;
+      }
+      
+      // Captura o UG da linha selecionada
+      var ug = table_dark[0].getElementsByTagName('td')[0].innerHTML;
+      
+      // Pede confirmação (Proteção contra cliques acidentais)
+      if (confirm("Tem certeza que deseja excluir a geradora UG " + ug + "? Essa ação não pode ser desfeita e removerá a linha da planilha.")) {
+        
+        google.script.run
+          .withSuccessHandler(function() {
+            alert("Geradora excluída com sucesso!");
+            gerar_tabela(); // Recarrega a tabela automaticamente para sumir com a linha deletada
+          })
+          .withFailureHandler(function(erro) {
+            alert("Erro ao excluir: " + erro.message);
+          })
+          .backend("excluir_geradora", ug); // Chama a função nova no .gs
+      }
+    }
+
   </script>
 </html>

@@ -17,13 +17,16 @@
           </div>
           <!-- botões -->
           <div class="row mt-3">
-            <div class="col-2">
+           <div class="col-2">
               <a href="https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/geradora/form&ug=0">
-                <button type="button" class="btn btn-success w-100" onclick="salvar_geradora(obj_para_lancar)"><i class="bi bi-plus-circle"></i>&nbsp;Novo</button>
+                <button type="button" class="btn btn-success w-100"><i class="bi bi-plus-circle"></i>&nbsp;Novo</button>
               </a>
             </div>
             <div class="col-2">
-              <button type="button" class="btn btn-success w-100" onclick="altera_geradora(obj_para_lancar)"><i class="bi bi-pencil"></i>&nbspAlterar</button>
+              <button type="button" class="btn btn-success w-100" onclick="altera_geradora()"><i class="bi bi-pencil"></i>&nbsp;Alterar</button>
+            </div>
+            <div class="col-2">
+              <button type="button" class="btn btn-danger w-100" onclick="deleta_geradora()"><i class="bi bi-trash"></i>&nbsp;Excluir</button>
             </div>
           </div>
           <div class="row">
@@ -51,89 +54,103 @@
     </div>
   </body>
   <script>
-
     $(document).ready(function(){
-      gerar_tabela()
+      gerar_tabela();
     });
 
     function altera_geradora(obj_para_lancar){
-      var table_geradora = document.getElementById("table_geradora")
-      var tbody =table_geradora.getElementsByTagName('tbody')[0] 
-      var table_dark = tbody.querySelectorAll('.table-dark')[0]
-      var ug = table_dark.getElementsByTagName('td')[0].innerHTML
+      var table_geradora = document.getElementById("table_geradora");
+      var tbody = table_geradora.getElementsByTagName('tbody')[0]; 
       
-      var a = document.createElement('a')
-      a.href = "https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/geradora/form&ug=" + ug.toString()
+      // Proteção: Verifica se tem alguma linha selecionada (evita erro se clicar antes de selecionar)
+      var table_dark = tbody.querySelectorAll('.table-dark');
+      if(table_dark.length === 0) {
+        alert("Por favor, selecione uma geradora na tabela primeiro.");
+        return;
+      }
       
-      document.getElementsByTagName('body')[0].appendChild(a)
-      a.click()
-
+      var ug = table_dark[0].getElementsByTagName('td')[0].innerHTML;
+      
+      var a = document.createElement('a');
+      a.href = "https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/geradora/form&ug=" + ug.toString();
+      
+      document.body.appendChild(a);
+      a.click();
     }
 
     function gerar_tabela(){
       google.script.run.withSuccessHandler(function(retorno){
-        var dados = JSON.parse(retorno)
-        dados = dados.slice(1,dados.lenght)
-        var table_geradora = document.getElementById("table_geradora")
-        var tbody =table_geradora.getElementsByTagName('tbody')[0] 
+        
+        // Verifica se o retorno veio como String (precisa de parse) ou se já veio como Array
+        var dados = typeof retorno === 'string' ? JSON.parse(retorno) : retorno;
+        
+        // Remove a linha do cabeçalho (agora escrito corretamente)
+        dados = dados.slice(1); 
+        
+        var table_geradora = document.getElementById("table_geradora");
+        var tbody = table_geradora.getElementsByTagName('tbody')[0]; 
+        
+        // Limpa a tabela antes de preencher (previne dados duplicados se recarregar)
+        tbody.innerHTML = '';
 
-        dados.forEach((item)=>{
-          var tr = document.createElement('tr')
-          tr.onclick = (e) =>{
-            limpa_click_na_tabela_geradora(tbody)
-            var click_l = e.currentTarget
-            click_l.classList.add("table-dark")
+        dados.forEach((item) => {
+          var tr = document.createElement('tr');
+          tr.style.cursor = 'pointer'; // Dá um feedback visual de que a linha é clicável
+          
+          tr.onclick = (e) => {
+            limpa_click_na_tabela_geradora(tbody);
+            e.currentTarget.classList.add("table-dark");
+          };
+
+          // Loop para criar as 8 colunas (TDs) baseadas nos itens do array
+          for(var i = 0; i < 8; i++) {
+            var td = document.createElement('td');
+            td.innerHTML = item[i] || ''; // O "|| ''" evita aparecer "undefined" se a célula do Sheets estiver em branco
+            tr.appendChild(td);
           }
-          // ug
-          var td = document.createElement('td')
-          td.innerHTML = item[0]
-          tr.appendChild(td)
 
-          // unidade_geradora
-          var td = document.createElement('td')
-          td.innerHTML = item[1]
-          tr.appendChild(td)
-
-          // prod_med
-          var td = document.createElement('td')
-          td.innerHTML = item[2]
-          tr.appendChild(td)
-
-          // qt_mes
-          var td = document.createElement('td')
-          td.innerHTML = item[3]
-          tr.appendChild(td)
-
-          // login
-          var td = document.createElement('td')
-          td.innerHTML = item[4]
-          tr.appendChild(td)
-
-          // senha
-          var td = document.createElement('td')
-          td.innerHTML = item[5]
-          tr.appendChild(td)
-
-          // acesso
-          var td = document.createElement('td')
-          td.innerHTML = item[6]
-          tr.appendChild(td)
-
-          // detalhe
-          var td = document.createElement('td')
-          td.innerHTML = item[7]
-          tr.appendChild(td)
-
-          tbody.appendChild(tr)
-        })
-      }).backend("ler_todas_geradoras",)//Obter lista de Geradoras
+          tbody.appendChild(tr);
+        });
+        
+      // ATENÇÃO: Se você realmente tem uma função no .gs chamada "backend", mude a linha abaixo para .backend("ler_todas_geradoras")
+      }).backend('ler_todas_geradoras', ); 
     }
 
     function limpa_click_na_tabela_geradora(tbody){
-      var todas_tr = tbody.querySelectorAll("tr")
-      todas_tr.forEach((item)=>{
-        item.classList.remove("table-dark")
-      })
+      var todas_tr = tbody.querySelectorAll("tr");
+      todas_tr.forEach((item) => {
+        item.classList.remove("table-dark");
+      });
     }
+
+    function deleta_geradora() {
+      var table_geradora = document.getElementById("table_geradora");
+      var tbody = table_geradora.getElementsByTagName('tbody')[0]; 
+      var table_dark = tbody.querySelectorAll('.table-dark');
+      
+      // Verifica se o usuário selecionou alguma linha
+      if(table_dark.length === 0) {
+        alert("Por favor, selecione uma geradora na tabela para excluir.");
+        return;
+      }
+      
+      // Captura o UG da linha selecionada
+      var ug = table_dark[0].getElementsByTagName('td')[0].innerHTML;
+      
+      // Pede confirmação (Proteção contra cliques acidentais)
+      if (confirm("Tem certeza que deseja excluir a geradora UG " + ug + "? Essa ação não pode ser desfeita e removerá a linha da planilha.")) {
+        
+        google.script.run
+          .withSuccessHandler(function() {
+            alert("Geradora excluída com sucesso!");
+            gerar_tabela(); // Recarrega a tabela automaticamente para sumir com a linha deletada
+          })
+          .withFailureHandler(function(erro) {
+            alert("Erro ao excluir: " + erro.message);
+          })
+          .backend("excluir_geradora", ug); // Chama a função nova no .gs
+      }
+    }
+
   </script>
 </html>

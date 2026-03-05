@@ -102,51 +102,80 @@
                 </div>
               </div>
               <script>
-                $(document).ready(function(){
-                  if(<?= ug; ?>!=0){
-                    google.script.run.withSuccessHandler(function(retorno){
-                      // ug
-                      document.getElementsByName('ug')[0].value = retorno[0]
-                      // unidade_geradora
-                      document.getElementsByName('unidade_geradora')[0].value = retorno[1]
-                      // prod_med
-                      document.getElementsByName('prod_med')[0].value = retorno[2]
-                      // qt_mes
-                      document.getElementsByName('qt_mes')[0].value = retorno[3]
-                      // login
-                      document.getElementsByName('login')[0].value = retorno[4]
-                      // senha
-                      document.getElementsByName('senha')[0].value = retorno[5]
-                      // acesso
-                      document.getElementsByName('acesso')[0].value = retorno[6]
-                      // detalhe
-                      document.getElementsByName('detalhe')[0].value = retorno[7]
-                    }).backend("ler_geradora_especifica",<?= ug; ?>)
+                $(document).ready(function () {
+                  // Captura o UG dinâmico do Apps Script
+                  var ug_atual = "<?= ug; ?>";
+
+                  // Se não for "0", significa que é edição
+                  if (ug_atual != "0" && ug_atual != "") {
+                    // 1. Captura o formulário e os campos pela sua lógica
+                    var form = document.getElementById("form_geradora");
+                    var inputs = form.querySelectorAll(".myInput");
+
+                    // Desativa os campos enquanto busca os dados
+                    inputs.forEach((i) => (i.disabled = true));
+
+                    google.script.run
+                      .withSuccessHandler(function (retorno) {
+                        var dados =
+                          typeof retorno === "string"
+                            ? JSON.parse(retorno)
+                            : retorno;
+
+                        if (dados) {
+                          // 2. O LOOP DE PREENCHIMENTO: Preenche cada input com o índice correspondente do array
+                          for (var i = 0; i < inputs.length; i++) {
+                            inputs[i].value = dados[i] || "";
+                          }
+                        }
+
+                        // Libera os campos novamente
+                        inputs.forEach((i) => (i.disabled = false));
+
+                        // Trava apenas o primeiro campo (que deve ser o UG) para proteger a chave
+                        if (inputs.length > 0) {
+                          inputs[0].disabled = true;
+                        }
+                      })
+                      .backend("ler_geradora_especifica", ug_atual);
                   }
                 });
 
-                function salvar_geradora(){
-                  // accesso ao html
-                  var form_geradora = document.getElementById('form_geradora')
-                  var myInput = form_geradora.querySelectorAll('.myInput')
+                function salvar_geradora() {
+                  var form = document.getElementById("form_geradora");
+                  var inputs = form.querySelectorAll(".myInput");
+                  var obj_para_lancar = {};
 
-                  var obj_para_lancar = {}
+                  // Loop para montar o objeto para o backend
+                  inputs.forEach(function (input) {
+                    if (input.id) {
+                      obj_para_lancar[input.id] = input.value;
+                    }
+                  });
 
-                  myInput.forEach((item)=>{
-                    obj_para_lancar[item.name] = item.value
-                  })
+                  // Força a leitura do UG, pois campos desativados (disabled) às vezes vêm vazios
+                  if (inputs.length > 0) {
+                    obj_para_lancar[inputs[0].id] = inputs[0].value;
+                  }
 
-                  google.script.run.withSuccessHandler(function(retorno){
+                  var btnSalvar = document.getElementById("btn_salvar");
+                  if (btnSalvar) btnSalvar.disabled = true;
 
-                    document.getElementById('meu_alert').style.display='flex'
+                  google.script.run
+                    .withSuccessHandler(function (retorno) {
+                      document.getElementById("meu_alert").style.display =
+                        "block";
 
-                    setTimeout(function(){
-                      var a = document.createElement('a')
-                      a.href = "https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/geradora/dados"
-                      document.getElementById('meu_alert').appendChild(a)
-                      a.click()
-                    },2000);
-                  }).backend('salvar_geradora',obj_para_lancar)
+                      setTimeout(function () {
+                        window.location.href =
+                          "https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/geradora/dados";
+                      }, 1500);
+                    })
+                    .withFailureHandler(function (erro) {
+                      alert("Erro ao salvar: " + erro.message);
+                      if (btnSalvar) btnSalvar.disabled = false;
+                    })
+                    .backend("salvar_geradora", obj_para_lancar);
                 }
               </script>
             </div>

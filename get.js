@@ -18,3 +18,9 @@ function include(filename) {
 function backend(func,args){
   return back_Usinas_MBF[func](args)
 }
+
+function testar_conexao_biblioteca() {
+  // Vamos tentar chamar a função diretamente para ver se ela existe na biblioteca
+  var resultado = back_Usinas_MBF.ler_todas_geradoras();
+  Logger.log(resultado);
+}

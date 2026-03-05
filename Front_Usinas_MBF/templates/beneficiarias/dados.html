@@ -28,7 +28,12 @@
           </div>
           <div class="row">
             <div class="col">
-                <table class="table" id="table_geradora">
+              <div id="loader" class="text-center my-3">
+                <div class="spinner-border text-success" role="status">
+                  <span class="visually-hidden">Carregando...</span>
+                </div>
+              </div>  
+              <table class="table" id="table_geradora">
                   <thead>
                     <tr>
                       <th scope="col">UC</th>
@@ -58,88 +63,50 @@
       beneficiaria_tabela()
     });
 
-    function altera_beneficiaria(obj_para_lancar){
-      var table_beneficiaria = document.getElementById("table_geradora")
-      var tbody =table_beneficiaria.getElementsByTagName('tbody')[0] 
-      var table_dark = tbody.querySelectorAll('.table-dark')[0]
-      var uc = table_dark.getElementsByTagName('td')[0].innerHTML
-      
-      var a = document.createElement('a')
-      a.href = "https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/geradora/form&uc=" + uc.toString()
-      
-      document.getElementsByTagName('body')[0].appendChild(a)
-      a.click()
-
+  function altera_beneficiaria() {
+    const selecionado = document.querySelector("#table_geradora tbody tr.table-dark");
+    
+    if (!selecionado) {
+      alert("Por favor, selecione uma beneficiária na tabela primeiro.");
+      return;
     }
 
-    function beneficiaria_tabela(){
-      google.script.run.withSuccessHandler(function(retorno){
-        var dados = JSON.parse(retorno)
-        dados = dados.slice(1,dados.lenght)
-        var table_beneficiaria = document.getElementById("table_geradora")
-        var tbody =table_beneficiaria.getElementsByTagName('tbody')[0] 
+    const uc = selecionado.getElementsByTagName('td')[0].innerHTML;
+    
+    // Busca a URL do script que o Google injeta automaticamente
+    google.script.run.withSuccessHandler(function(url) {
+      window.open(url + "?page=templates/geradora/form&uc=" + uc, "_top");
+    }).getScriptUrl(); // Você precisará criar essa função simples no backend
+  }
 
-        dados.forEach((item)=>{
-          var tr = document.createElement('tr')
-          tr.onclick = (e) =>{
-            limpa_click_na_tabela_beneficiaria(tbody)
-            var click_l = e.currentTarget
-            click_l.classList.add("table-dark")
-          }
-          // uc	
-          var td = document.createElement('td')
-          td.innerHTML = item[0]
-          tr.appendChild(td)
+    function beneficiaria_tabela() {
+  // Adicione um spinner ou mensagem de carregamento aqui se desejar
+  google.script.run.withSuccessHandler(function(retorno) {
+    const dados = JSON.parse(retorno);
+    const corpoTabela = document.querySelector("#table_geradora tbody");
+    corpoTabela.innerHTML = ""; // Limpa a tabela antes de renderizar
 
-          // nome_cliente	
-          var td = document.createElement('td')
-          td.innerHTML = item[1]
-          tr.appendChild(td)
+    // Remove o cabeçalho se ele vier no array
+    const linhas = dados.slice(1);
 
-          // rt_%	
-          var td = document.createElement('td')
-          td.innerHTML = item[2]
-          tr.appendChild(td)
+    linhas.forEach((item) => {
+      const tr = document.createElement('tr');
+      tr.style.cursor = "pointer";
+      
+      // Lógica de seleção
+      tr.onclick = (e) => {
+        document.querySelectorAll("#table_geradora tbody tr").forEach(r => r.classList.remove("table-dark"));
+        e.currentTarget.classList.add("table-dark");
+      };
 
-          // venc	
-          var td = document.createElement('td')
-          td.innerHTML = item[3]
-          tr.appendChild(td)
-
-          // ug	
-          var td = document.createElement('td')
-          td.innerHTML = item[4]
-          tr.appendChild(td)
-
-          // repasse	
-          var td = document.createElement('td')
-          td.innerHTML = item[5]
-          tr.appendChild(td)
-
-          // %_repasse		
-          var td = document.createElement('td')
-          td.innerHTML = item[6]
-          tr.appendChild(td)
-
-          // unidade	prox_leit	status
-          var td = document.createElement('td')
-          td.innerHTML = item[7]
-          tr.appendChild(td)
-
-          // prox_leit
-          var td = document.createElement('td')
-          td.innerHTML = item[8]
-          tr.appendChild(td)
-
-          // status
-          var td = document.createElement('td')
-          td.innerHTML = item[9]
-          tr.appendChild(td)
-
-          tbody.appendChild(tr)
-        })
-      }).backend("ler_todas_beneficiarias",)//Obter lista de Geradoras
-    }
+      // Injeção rápida de colunas usando Map e Join
+      // Isso substitui as 50 linhas de appendChild
+      tr.innerHTML = item.map(coluna => `<td>${coluna || '-'}</td>`).join('');
+      
+      corpoTabela.appendChild(tr);
+    });
+  }).backend("ler_todas_beneficiarias");
+}
 
     function limpa_click_na_tabela_beneficiaria(tbody){
       var todas_tr = tbody.querySelectorAll("tr")
