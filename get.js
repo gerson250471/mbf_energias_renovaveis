@@ -1,23 +1,37 @@
 function doGet(e) {
   try {
-    var html = HtmlService.createTemplateFromFile(e.parameter.page);
+    // Se não houver parâmetro 'page', define a index como padrão antes de tentar criar o template
+    var destino = (e.parameter && e.parameter.page) ? e.parameter.page : "templates/index";
     
-    // Variável do módulo de Geradoras
-    html.ug = e.parameter.ug; 
+    var html = HtmlService.createTemplateFromFile(destino);
     
-    // Variável do módulo de Beneficiárias (NOVA LINHA)
-    html.uc = e.parameter.uc; 
+    html.url = ScriptApp.getService().getUrl(); 
+    html.ug = e.parameter.ug || ""; 
+    html.uc = e.parameter.uc || ""; 
     
-    return html.evaluate();
+    return html.evaluate()
+      .setTitle('Sistema Solar MBF')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+      
   } catch(err) {
+    // Log para você ver o erro no console do GAS se algo falhar
+    Logger.log("Erro no doGet: " + err.toString());
+    
     var html = HtmlService.createTemplateFromFile("templates/index");
+    html.url = ScriptApp.getService().getUrl(); 
     return html.evaluate();
   }
 }
 
 function include(filename) {
-  return HtmlService.createHtmlOutputFromFile(filename)
-      .getContent();
+  // Em vez de retornar apenas o conteúdo, criamos um template e avaliamos
+  var template = HtmlService.createTemplateFromFile(filename);
+  
+  // Passamos a URL para dentro do componente incluído
+  template.url = ScriptApp.getService().getUrl(); 
+  
+  return template.evaluate().getContent();
 }
 
 // ACESSA O BACKEND
