@@ -11,154 +11,144 @@
           <?!= include('multiuso/menu_lateral'); ?>
         </div>
         <div class='col-10'>
-          <!-- Formulário para Inserir Informação -->
+          
           <div class='row mt-3'>
-            <h5>LISTA DE BENEFICIÁRIAS</h5>
+            <h5>LISTA DE BENEFICIÁRIAS (UNIDADES CONSUMIDORAS)</h5>
           </div>
-          <!-- botões -->
+          
           <div class="row mt-3">
             <div class="col-2">
               <a href="https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/beneficiaria/form&uc=0">
-                <button type="button" class="btn btn-success w-100" onclick="salvar_beneficiaria(obj_para_lancar)"><i class="bi bi-plus-circle"></i>&nbsp;Novo</button>
+                <button type="button" class="btn btn-success w-100"><i class="bi bi-plus-circle"></i>&nbsp;Novo</button>
               </a>
             </div>
             <div class="col-2">
-              <button type="button" class="btn btn-success w-100" onclick="altera_beneficiaria()"><i class="bi bi-pencil"></i>&nbspAlterar</button>
+              <button type="button" class="btn btn-success w-100" onclick="altera_beneficiaria()"><i class="bi bi-pencil"></i>&nbsp;Alterar</button>
+            </div>
+            <div class="col-2">
+              <button type="button" class="btn btn-danger w-100" onclick="deleta_beneficiaria()"><i class="bi bi-trash"></i>&nbsp;Excluir</button>
             </div>
           </div>
-          <div class="row">
-            <div class="col">
-                <table class="table" id="table_beneficiaria">
+          
+          <div class="row mt-3">
+            <div class="col" style="overflow-x: auto;"> <table class="table table-hover" id="table_beneficiaria" style="white-space: nowrap; font-size: 0.9em;">
                   <thead>
                     <tr>
-                      <!-- uc  -->
                       <th scope="col">UC</th>
-                      <!-- nome_cliente  -->
-                      <th scope="col">NOME DA BENEFICIÁRIA</th>
-                      <!-- rt_%  -->
-                      <th scope="col">RATEIO %</th>
-                      <!-- venc  -->
-                      <th scope="col">VENCE EM</th>
-                      <!-- ug  -->
+                      <th scope="col">CLIENTE</th>
+                      <th scope="col">RT %</th>
+                      <th scope="col">VENC</th>
                       <th scope="col">UG</th>
-                      <!--  repasse  -->
                       <th scope="col">REPASSE</th>
-                      <!-- %_repasse   -->
-                      <th scope="col">REPASSE %</th>
-                      <!-- unidade   -->
+                      <th scope="col">% REPASS</th>
                       <th scope="col">UNIDADE</th>
-                      <!-- prox_leit   -->
-                      <th scope="col">PRÓXIMA LEITURA</th>
-                      <!-- status  -->
+                      <th scope="col">PROX LEIT</th>
                       <th scope="col">STATUS</th>
-
+                      <th scope="col">QT MED</th>
+                      <th scope="col">MED CONS</th>
+                      <th scope="col">USINA</th>
                     </tr>
                   </thead>
                   <tbody>
-                    
-                  </tbody>
+                    </tbody>
                 </table>
             </div>
           </div>
+          
       </div>
     </div>
   </body>
+  
   <script>
-
     $(document).ready(function(){
-      beneficiaria_tabela()
+      gerar_tabela();
     });
 
-    function altera_beneficiaria(obj_para_lancar){
-      var table_beneficiaria = document.getElementById("table_beneficiaria")
-      var tbody =table_beneficiaria.getElementsByTagName('tbody')[0] 
-      var table_dark = tbody.querySelectorAll('.table-dark')[0]
-      var uc = table_dark.getElementsByTagName('td')[0].innerHTML
-      
-      var a = document.createElement('a')
-      a.href = "https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/beneficiaria/form&uc=" + uc.toString()
-      
-      document.getElementsByTagName('body')[0].appendChild(a)
-      a.click()
-
+    function alterar_visual_linha(tbody){
+      var todas_tr = tbody.querySelectorAll("tr");
+      todas_tr.forEach((item) => {
+        item.classList.remove("table-dark");
+      });
     }
 
-    function beneficiaria_tabela(){
+    function gerar_tabela(){
+      var table = document.getElementById("table_beneficiaria");
+      var tbody = table.getElementsByTagName('tbody')[0]; 
+      tbody.innerHTML = '<tr><td colspan="13" class="text-center">Carregando dados...</td></tr>';
+
       google.script.run.withSuccessHandler(function(retorno){
-        var dados = JSON.parse(retorno)
-        dados = dados.slice(1,dados.lenght)
-        var table_beneficiaria = document.getElementById("table_beneficiaria")
-        var tbody =table_beneficiaria.getElementsByTagName('tbody')[0] 
+        var dados = typeof retorno === 'string' ? JSON.parse(retorno) : retorno;
+        
+        // Remove o cabeçalho
+        dados = dados.slice(1); 
+        tbody.innerHTML = '';
 
-        dados.forEach((item)=>{
-          var tr = document.createElement('tr')
-          tr.onclick = (e) =>{
-            limpa_click_na_tabela_beneficiaria(tbody)
-            var click_l = e.currentTarget
-            click_l.classList.add("table-dark")
+        dados.forEach((item) => {
+          var tr = document.createElement('tr');
+          tr.style.cursor = 'pointer'; 
+          
+          tr.onclick = (e) => {
+            alterar_visual_linha(tbody);
+            e.currentTarget.classList.add("table-dark");
+          };
+
+          // Loop para criar as 13 colunas baseadas na aba do Sheets
+          for(var i = 0; i < 13; i++) {
+            var td = document.createElement('td');
+            td.innerHTML = item[i] || ''; 
+            tr.appendChild(td);
           }
-
-          // uc 
-          var td = document.createElement('td')
-          td.innerHTML = item[0]
-          tr.appendChild(td)
-
-          // nome_cliente 
-          var td = document.createElement('td')
-          td.innerHTML = item[1]
-          tr.appendChild(td)
-
-          // rt_% 
-          var td = document.createElement('td')
-          td.innerHTML = item[2]
-          tr.appendChild(td)
-
-          // venc 
-          var td = document.createElement('td')
-          td.innerHTML = item[3]
-          tr.appendChild(td)
-
-          // ug 
-          var td = document.createElement('td')
-          td.innerHTML = item[4]
-          tr.appendChild(td)
-
-          // repasse  
-          var td = document.createElement('td')
-          td.innerHTML = item[5]
-          tr.appendChild(td)
-
-          // %_repasse  
-          var td = document.createElement('td')
-          td.innerHTML = item[6]
-          tr.appendChild(td)
-
-          // unidade  
-          var td = document.createElement('td')
-          td.innerHTML = item[7]
-          tr.appendChild(td)
-
-          // prox_leit  
-          var td = document.createElement('td')
-          td.innerHTML = item[8]
-          tr.appendChild(td)
-
-          //status  
-          var td = document.createElement('td')
-          td.innerHTML = item[9]
-          tr.appendChild(td)
-
-          tbody.appendChild(tr)
-        })
-      }).backend("ler_todas_beneficiarias",)//Obter lista de beneficiarias
+          tbody.appendChild(tr);
+        });
+        
+      }).backend("ler_todas_beneficiarias"); 
     }
 
-    function limpa_click_na_tabela_beneficiaria(tbody){
-      var todas_tr = tbody.querySelectorAll("tr")
-      todas_tr.forEach((item)=>{
-        item.classList.remove("table-dark")
-      })
+    function altera_beneficiaria(){
+      var table = document.getElementById("table_beneficiaria");
+      var tbody = table.getElementsByTagName('tbody')[0]; 
+      var table_dark = tbody.querySelectorAll('.table-dark');
+      
+      if(table_dark.length === 0) {
+        alert("Por favor, selecione uma beneficiária na tabela primeiro.");
+        return;
+      }
+      
+      // Pega a UC (Coluna 0)
+      var uc = table_dark[0].getElementsByTagName('td')[0].innerHTML;
+      
+      var a = document.createElement('a');
+      a.href = "https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/beneficiaria/form&uc=" + uc.toString();
+      
+      document.body.appendChild(a);
+      a.click();
+    }
+
+    function deleta_beneficiaria() {
+      var table = document.getElementById("table_beneficiaria");
+      var tbody = table.getElementsByTagName('tbody')[0]; 
+      var table_dark = tbody.querySelectorAll('.table-dark');
+      
+      if(table_dark.length === 0) {
+        alert("Por favor, selecione uma beneficiária na tabela para excluir.");
+        return;
+      }
+      
+      var uc = table_dark[0].getElementsByTagName('td')[0].innerHTML;
+      var nome = table_dark[0].getElementsByTagName('td')[1].innerHTML;
+      
+      if (confirm("ATENÇÃO: Deseja excluir permanentemente a Beneficiária " + nome + " (UC: " + uc + ")?")) {
+        
+        google.script.run
+          .withSuccessHandler(function() {
+            alert("Beneficiária excluída com sucesso!");
+            gerar_tabela(); 
+          })
+          .withFailureHandler(function(erro) {
+            alert("Erro ao excluir: " + erro.message);
+          })
+          .backend("excluir_beneficiaria", uc); 
+      }
     }
   </script>
 </html>
-

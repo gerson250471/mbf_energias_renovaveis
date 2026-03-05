@@ -1,145 +1,252 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <base target="_top">
+    <base target="_top" />
     <?!= include('multiuso/header'); ?>
   </head>
   <body>
-    <div class='container-fluid'>
-      <div class='row' style='height: 100vh;'>
-        <div class='col-2'>
-          <?!= include('multiuso/menu_lateral'); ?>
-        </div>
-        <div class='col-10' id="form_beneficiaria">
-          <!-- Formulário para Inserir Informação -->
-          <div class='row mt-3'>
-            <h5>BENEFICIÁRIAS</h5>
+    <div class="container-fluid">
+      <div class="row" style="height: 100vh">
+        <div class="col-2"><?!= include('multiuso/menu_lateral'); ?></div>
+        <div class="col-10" id="form_beneficiaria">
+          <div class="row mt-3">
+            <h5>CADASTRO DE BENEFICIÁRIA (UNIDADE CONSUMIDORA)</h5>
           </div>
-          <div class='row'>
-            <!-- UC -->
-            <div class='col-2'>
-              <label class="form-label">UC</label>
-              <input type="number" name="uc"  class="form-control myInput">
-            </div>
-            <!-- DESCRIÇÃO UG -->
-            <div class='col-6'>
-              <label class="form-label">NOME DA BENEFICIÁRIA</label>
-              <input type="text" name="nome_cliente" class="form-control myInput">
-            </div>
-            <!-- RATEIO -->
-            <div class='col-2'>
-              <label class="form-label">RATEIO %</label>
-              <input type="number" name="rat_%" class="form-control myInput">
-            </div>
-            <!-- DIA DE VENCIMENTO -->
-            <div class='col-2'>
-              <label class="form-label">DIA VENCE</label>
-              <input type="number" name="vence" class="form-control myInput">
-            </div>
-            <!-- UG -->
-            <div class="row">
-              <div class='col-2'>
-                <label class="form-label">UC</label>
-                <input type="number" name="uc" class="form-control myInput">
-              </div>
-              <!-- REPASSE -->
-              <div class='col-2'>
-                <label class="form-label">REPASSE</label>
-                <input type="text" name="repasse" class="form-control myInput">
-              </div>
-              <!-- REPASSE % -->
-              <div class='col-2'>
-                <label class="form-label">REPASSE %</label>
-                <input type="number" name="%_repasse" class="form-control myInput">
-              </div>
-              <!-- UNIDADE -->
-              <div class='col-2'>
-                <label class="form-label">UNIDADE</label>
-                <input type="text" name="unidade" class="form-control myInput">
-              </div>
-              <!-- PRÓXIMA LEITURA -->
-              <div class='col-2'>
-                <label class="form-label">PRÓXIMA LEITURA</label>
-                <input type="date" name="prox_leit" class="form-control myInput">
-              </div>
-              <!-- STATUS -->
-              <div class='col-2'>
-                <label class="form-label">STATUS</label>
-                <input type="text" name="status" class="form-control myInput">
-              </div>
-              <!-- BOTÕES -->
-              <div class="row mt-3">
-                <div class='col-2'>
-                  <a href="https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/beneficiaria/dados">
-                    <button type="button" class="btn btn-danger w-100">Cancelar</button>
-                  </a>
-                </div>
-                <div class='col-2'>
-                  <button type="button" class="btn btn-success w-100" onclick="salvar_beneficiaria()">Salvar</button>
-                </div>
-              </div>
-              <div class="row mt-3">
-                <div class="col-4">
-                  <div class="alert alert-success" role="alert" id="meu_alert" style="display:none;">
-                    Geradora Salva com Sucesso !
-                  </div>
-                </div>
-              </div>
-              <script>
-                $(document).ready(function(){
-                  if(<?= uc; ?>!=0){
-                    google.script.run.withSuccessHandler(function(retorno){
-                      // uc 
-                      document.getElementsByName('uc')[0].value = retorno[0]
-                      // nome_cliente 
-                      document.getElementsByName('nome_cliente')[0].value = retorno[1]
-                      // rt_% 
-                      document.getElementsByName('rt_%  ')[0].value = retorno[2]
-                      // venc 
-                      document.getElementsByName('venc')[0].value = retorno[3]
-                      // ug 
-                      document.getElementsByName('ug')[0].value = retorno[4]
-                      // repasse  
-                      document.getElementsByName('repasse')[0].value = retorno[5]
-                      // %_repasse  
-                      document.getElementsByName('%_repasse')[0].value = retorno[6]
-                      // unidade  
-                      document.getElementsByName('unidade')[0].value = retorno[7]
-                      // prox_leit  
-                      document.getElementsByName('prox_leit')[0].value = retorno[8]
-                      // status 
-                      document.getElementsByName('status')[0].value = retorno[9]
 
-                    }).backend("ler_beneficiaria_especifica",<?= uc; ?>)
+          <div class="row mt-3">
+            <div class="col-3">
+              <label class="form-label">UC (Unidade Consumidora)</label>
+              <input type="number" id="uc" class="form-control myInput" />
+            </div>
+            <div class="col-5">
+              <label class="form-label">NOME DO CLIENTE</label>
+              <input
+                type="text"
+                id="nome_cliente"
+                class="form-control myInput"
+              />
+            </div>
+            <div class="col-2">
+              <label class="form-label">STATUS</label>
+              <select id="status" class="form-control myInput">
+                <option value="Ativo">Ativo</option>
+                <option value="Inativo">Inativo</option>
+              </select>
+            </div>
+            <div class="col-2">
+              <label class="form-label">VENCIMENTO</label>
+              <input
+                type="text"
+                id="venc"
+                class="form-control myInput"
+                placeholder="Ex: Dia 10"
+              />
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-4">
+              <label class="form-label">UG (USINA GERADORA)</label>
+              <select id="ug" class="form-control myInput">
+                <option value="">Selecione uma Usina...</option>
+              </select>
+            </div>
+            <div class="col-4">
+              <label class="form-label">USINA (NOME/DETALHE)</label>
+              <input type="text" id="usina" class="form-control myInput" />
+            </div>
+            <div class="col-4">
+              <label class="form-label">UNIDADE</label>
+              <input type="text" id="unidade" class="form-control myInput" />
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-2">
+              <label class="form-label">RATEIO (%)</label>
+              <input
+                type="text"
+                id="rt_%"
+                class="form-control myInput"
+                step="0.01"
+              />
+            </div>
+            <div class="col-2">
+              <label class="form-label">REPASSE</label>
+              <input type="text" id="repasse" class="form-control myInput" />
+            </div>
+            <div class="col-2">
+              <label class="form-label">REPASSE (%)</label>
+              <input
+                type="text"
+                id="%_repass"
+                class="form-control myInput"
+                step="0.01"
+              />
+            </div>
+            <div class="col-2">
+              <label class="form-label">PRÓX. LEITURA</label>
+              <input type="text" id="prox_leit" class="form-control myInput" />
+            </div>
+            <div class="col-2">
+              <label class="form-label">QT MESES</label>
+              <input type="number" id="qt_med" class="form-control myInput" />
+            </div>
+            <div class="col-2">
+              <label class="form-label">MÉD. CONSUMO</label>
+              <input type="number" id="med_cons" class="form-control myInput" />
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-2">
+              <a
+                href="https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/beneficiaria/dados"
+              >
+                <button type="button" class="btn btn-danger w-100">
+                  Cancelar
+                </button>
+              </a>
+            </div>
+            <div class="col-2">
+              <button
+                type="button"
+                class="btn btn-success w-100"
+                id="btn_salvar"
+                onclick="salvar_beneficiaria()"
+              >
+                Salvar
+              </button>
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-4">
+              <div
+                class="alert alert-success"
+                role="alert"
+                id="meu_alert"
+                style="display: none"
+              >
+                Beneficiária Salva com Sucesso!
+              </div>
+            </div>
+          </div>
+
+          <script>
+            $(document).ready(function () {
+              carregar_lista_ugs();
+            });
+
+            function carregar_lista_ugs() {
+              google.script.run
+                .withSuccessHandler(function (retorno) {
+                  var dados =
+                    typeof retorno === "string" ? JSON.parse(retorno) : retorno;
+                  var selectUg = document.getElementById("ug");
+
+                  for (var i = 1; i < dados.length; i++) {
+                    var option = document.createElement("option");
+                    option.value = dados[i][0];
+                    option.text = dados[i][0] + " - " + dados[i][1];
+                    selectUg.appendChild(option);
                   }
-                });
+                  carregar_se_edicao();
+                })
+                .backend("ler_todas_geradoras");
+            }
 
-                function salvar_beneficiaria(){
-                  // accesso ao html
-                  var form_beneficiaria = document.getElementById('form_beneficiaria')
-                  var myInput = form_beneficiaria.querySelectorAll('.myInput')
+            function carregar_se_edicao() {
+              var uc_atual = "<?= uc; ?>";
 
-                  var obj_para_lancar = {}
+              if (
+                uc_atual != "0" &&
+                uc_atual != "" &&
+                typeof uc_atual !== "undefined"
+              ) {
+                var form = document.getElementById("form_beneficiaria");
+                var inputs = form.querySelectorAll(".myInput");
 
-                  myInput.forEach((item)=>{
-                    obj_para_lancar[item.name] = item.value
+                inputs.forEach((i) => (i.disabled = true));
+
+                google.script.run
+                  .withSuccessHandler(function (dados) {
+                    if (dados) {
+                      var mapaColunas = [
+                        "uc", // Coluna A
+                        "nome_cliente", // Coluna B
+                        "rt_%", // Coluna C
+                        "venc", // Coluna D
+                        "ug", // Coluna E
+                        "repasse", // Coluna F
+                        "%_repass", // Coluna G
+                        "unidade", // Coluna H
+                        "prox_leit", // Coluna I
+                        "status", // Coluna J
+                        "qt_med", // Coluna K
+                        "med_cons", // Coluna L
+                        "usina", // Coluna M
+                      ];
+
+                      for (var i = 0; i < mapaColunas.length; i++) {
+                        var idCampo = mapaColunas[i];
+                        var valor = dados[i];
+                        var campo = document.getElementById(idCampo);
+
+                        if (campo) {
+                          campo.value = valor || "";
+                        }
+                      }
+                    }
+
+                    inputs.forEach((i) => (i.disabled = false));
+                    if (inputs.length > 0) inputs[0].disabled = true;
                   })
+                  .backend("ler_beneficiaria_especifica", uc_atual);
+              }
+            }
 
-                  google.script.run.withSuccessHandler(function(retorno){
+            function salvar_beneficiaria() {
+              var form = document.getElementById("form_beneficiaria");
+              var inputs = form.querySelectorAll(".myInput");
+              var obj_para_lancar = {};
 
-                    document.getElementById('meu_alert').style.display='flex'
-
-                    setTimeout(function(){
-                      var a = document.createElement('a')
-                      a.href = "https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/beneficiaria/dados"
-                      document.getElementById('meu_alert').appendChild(a)
-                      a.click()
-                    },2000);
-                  }).backend('salvar_beneficiaria',obj_para_lancar)
+              inputs.forEach(function (input) {
+                if (input.id) {
+                  obj_para_lancar[input.id] = input.value;
                 }
-              </script>
-            </div>
-          </div>
+              });
+
+              if (inputs.length > 0) {
+                obj_para_lancar[inputs[0].id] = inputs[0].value;
+              }
+
+              if (!obj_para_lancar.uc || !obj_para_lancar.nome_cliente) {
+                alert(
+                  "Por favor, preencha pelo menos a UC e o Nome do Cliente.",
+                );
+                return;
+              }
+
+              var btnSalvar = document.getElementById("btn_salvar");
+              if (btnSalvar) btnSalvar.disabled = true;
+
+              google.script.run
+                .withSuccessHandler(function (retorno) {
+                  document.getElementById("meu_alert").style.display = "block";
+
+                  setTimeout(function () {
+                    window.location.href =
+                      "https://script.google.com/macros/s/AKfycbyiKeZCPZmxifwCu7E8lFI1RXCiNSppXcRjG6_-W3jq/dev?page=templates/beneficiaria/dados";
+                  }, 1500);
+                })
+                .withFailureHandler(function (erro) {
+                  alert("Erro ao salvar: " + erro.message);
+                  if (btnSalvar) btnSalvar.disabled = false;
+                })
+                .backend("salvar_beneficiaria", obj_para_lancar);
+            }
+          </script>
         </div>
       </div>
     </div>

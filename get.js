@@ -1,10 +1,16 @@
 function doGet(e) {
-  try{
-    var html = HtmlService.createTemplateFromFile(e.parameter.page)
-    html.ug = e.parameter.ug
+  try {
+    var html = HtmlService.createTemplateFromFile(e.parameter.page);
+    
+    // Variável do módulo de Geradoras
+    html.ug = e.parameter.ug; 
+    
+    // Variável do módulo de Beneficiárias (NOVA LINHA)
+    html.uc = e.parameter.uc; 
+    
     return html.evaluate();
-  }catch(err){
-    var html = HtmlService.createTemplateFromFile("templates/index")
+  } catch(err) {
+    var html = HtmlService.createTemplateFromFile("templates/index");
     return html.evaluate();
   }
 }
